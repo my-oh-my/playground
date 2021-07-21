@@ -1,9 +1,5 @@
 package com.myself.sql.executor.app.model
 
-import com.myself.sql.executor.app.service.spark.SparkSessionWrapper
-import org.apache.spark.sql.{Row, SaveMode}
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
-
 /**
  * Data set main information
  *
@@ -86,22 +82,3 @@ final case class JobDefinition(inputsDataInfo: List[InputDataInfo],
  */
 final case class JobRequest(jobDefinition: String,
                             compressionType: Option[String] = Some("none"))
-
-object SaveToParquet extends App {
-
-  implicit val sparkSession = SparkSessionWrapper()
-
-  val schema = StructType(
-    Seq(StructField("col_a", StringType),
-    StructField("col_b", IntegerType))
-  )
-
-  val data = Seq(
-    Row("first", 1000),
-    Row("second", 2000)
-  )
-
-  val dataFrame = sparkSession.createDataFrame(sparkSession.sparkContext.parallelize(data), schema)
-
-  dataFrame.write.mode(SaveMode.Overwrite).parquet("/Users/me/Desktop/Data/in/")
-}

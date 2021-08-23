@@ -26,7 +26,7 @@ object SqlExecutorActor {
 
     // collect JobDefinition
     val jobDefinition = JsonUtil.fromJson[JobDefinition](
-      Utilities.decompress(jobRequest.compressionType.get, jobRequest.jobDefinition)
+      Utilities.decompress(jobRequest.jobDefinitionStr, jobRequest.compressionType)
     )
     // recreate SparkSession each time new JobRequest is processed
     //  or reuse existing one

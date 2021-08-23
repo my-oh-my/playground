@@ -34,7 +34,7 @@ object ServerActor {
       val routes = RestEndPoints.bindRoutes(config)
 
       val serverBinding: Future[Http.ServerBinding] =
-        Http().newServerAt(config.getString("sql-executor.host"), config.getInt("sql-executor.port")).bind(routes)
+        Http().newServerAt(config.getString("host"), config.getInt("port")).bind(routes)
 
       context.pipeToSelf(serverBinding) {
         case Success(binding) =>

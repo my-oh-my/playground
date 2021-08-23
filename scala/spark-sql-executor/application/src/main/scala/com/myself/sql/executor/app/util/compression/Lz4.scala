@@ -19,7 +19,7 @@ object Lz4 extends Compressor {
     val compressor: LZ4Compressor = factory.highCompressor()
     val compressorWL: LZ4CompressorWithLength = new LZ4CompressorWithLength(compressor)
 
-    Base64.getEncoder().encodeToString(compressorWL.compress(data))
+    Base64.getEncoder.encodeToString(compressorWL.compress(data))
   }
 
   override def decompress(data: Array[Byte]): Array[Byte] = {
@@ -32,9 +32,9 @@ object Lz4 extends Compressor {
 
   override def decompress(data: String): String = {
 
-    val bytes: Array[Byte] = Base64.getDecoder()decode(data)
+    val bytes: Array[Byte] = Base64.getDecoder.decode(data)
 
-    new String(bytes, StandardCharsets.UTF_8)
+    new String(decompress(bytes), StandardCharsets.UTF_8)
   }
 
 }

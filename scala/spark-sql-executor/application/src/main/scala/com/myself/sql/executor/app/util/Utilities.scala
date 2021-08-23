@@ -2,12 +2,11 @@ package com.myself.sql.executor.app.util
 
 import java.io.ByteArrayInputStream
 import java.util.Properties
-
 import com.myself.sql.executor.app.model.Arguments
 import com.myself.sql.executor.app.util.compression.Lz4
 import com.typesafe.config.{Config, ConfigFactory}
 
-import scala.io.Source
+import scala.io.{BufferedSource, Source}
 
 object Utilities {
 
@@ -25,14 +24,19 @@ object Utilities {
     ConfigFactory.parseResources("application.conf").withFallback(config).resolve()
   }
 
-  def readFromFile(path: String): Iterator[String] = {
+  def readFromFile(path: String): (BufferedSource, Iterator[String]) = {
 
-    val source = Source.fromFile(path)
-    try {
-      source.getLines()
-    } finally {
-      source.close()
+    val resource = Source.fromFile(path)
+    val lines = try {
+      resource.getLines()
+    } catch {
+      case exception: Throwable =>
+        resource.close()
+
+        throw new RuntimeException(s"Exception when reading from file: $exception")
     }
+
+    (resource, lines)
   }
 
   def measureJob[T](process: => T): (T, Long) = {
@@ -44,13 +48,15 @@ object Utilities {
     (assignedProcess, processStop - processStart)
   }
 
-  def decompress(compressionType: String, text: String): String = {
+  def decompress(text: String, compressionType: Option[String] = None): String = {
 
-    compressionType.toLowerCase match {
-
-      case "lz4" => Lz4.decompress(text)
-      case "none" => text
-      case _ => throw new RuntimeException(s"Provided compression $compressionType is not supported")
+    compressionType match {
+      case Some(definedCompressionType) => definedCompressionType match {
+        case "lz4" => Lz4.decompress(text)
+        case "none" => text
+        case _ => throw new RuntimeException(s"Provided compression $compressionType is not supported")
+      }
+      case None => text
     }
   }
 

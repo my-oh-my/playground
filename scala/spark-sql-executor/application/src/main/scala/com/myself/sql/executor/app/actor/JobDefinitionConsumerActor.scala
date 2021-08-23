@@ -40,10 +40,10 @@ class JobDefinitionConsumerActor(context: ActorContext[JobDefinitionConsumerActo
     message match {
       case Consume =>
         // poll JobDefinition messages and execute through SqlExecutorActor
-        consumeJobDefinitions(consumer).foreach(jobDefinition =>
+        for(jobDefinition <- consumeJobDefinitions(consumer)) {
 
           sendTo ! SqlExecutorActor.Execute(context.self, jobDefinition)
-        )
+        }
 
         Behaviors.same
     }

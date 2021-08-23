@@ -41,7 +41,7 @@ sealed abstract class DataReader(schema: Option[StructType] = None)
    * @param path  input data set path
    * @return
    */
-  def readDataFrame(path: String): DataFrame = {
+  def readDataFrame(path: Option[String] = None): DataFrame = {
 
     val dataFrameReader = getDataFrameReader(format)
 
@@ -52,7 +52,10 @@ sealed abstract class DataReader(schema: Option[StructType] = None)
     // apply schema
     val dataFrameReaderWithSchema = applySchema(dataFrameReaderWithOptions, schema)
 
-    dataFrameReaderWithSchema.load(path)
+    // for JDBC connections path is not provided
+    if (path.isDefined) {
+      dataFrameReaderWithSchema.load(path.get)
+    } else dataFrameReaderWithSchema.load()
   }
 
   /**

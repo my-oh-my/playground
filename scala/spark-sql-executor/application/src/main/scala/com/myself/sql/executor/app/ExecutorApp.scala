@@ -48,6 +48,7 @@ object ExecutorApp {
     temporaryViewAlias
   }
 
+  // start standard mode execution
   def main(args: Array[String]): Unit = {
 
     // resolve configuration
@@ -56,7 +57,12 @@ object ExecutorApp {
     // parse arguments
     val arguments = Arguments.parse(args)
     val jobDefinitionStr: String = arguments.getJobDefinition
-    val compressionType: String = arguments.getCompressionType
+    require(
+      jobDefinitionStr != null,
+      "Exception when starting standard execution mode, -jobDefinition was not provided"
+    )
+
+    val compressionType: Option[String] = Option(arguments.getCompressionType)
 
     val jobDefinition: JobDefinition = JsonUtil.fromJson[JobDefinition] {
       Utilities.decompress(jobDefinitionStr, compressionType)
@@ -101,11 +107,15 @@ class ExecutorApp(config: Config)(implicit sparkSession: SparkSession) {
 
     // execute provide compressed SQL
     val resultDF = SqlExecutor().execute(
-      Utilities.decompress(jobDefinition.sql.text, jobDefinition.sql.compressionType.get)
+      Utilities.decompress(jobDefinition.sql.text, jobDefinition.sql.compressionType)
     )
 
     // write result DataFrame
-    DataWriter.write(resultDF, jobDefinition.outputDataInfo)
+    val outputDataInfo = jobDefinition.outputDataInfo
+    if (outputDataInfo.isDefined) {
+
+      DataWriter.write(resultDF, outputDataInfo.get)
+    }
 
     (sparkSession, jobDefinition, resultDF)
   }

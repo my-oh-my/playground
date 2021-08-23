@@ -15,6 +15,7 @@ object ExecutorAsService {
     // resolver application.conf properties
     val arguments: Arguments = Arguments.parse(args)
     val config: Config = Utilities.resolveConfig(arguments)
+    require(!(config == null), "Missing -config argument")
 
     val system = ActorSystem(ServerActor(config), "sql-executor-server")
 

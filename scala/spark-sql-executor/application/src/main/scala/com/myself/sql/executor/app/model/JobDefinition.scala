@@ -1,5 +1,7 @@
 package com.myself.sql.executor.app.model
 
+import org.apache.spark.sql.SaveMode
+
 /**
  * Data set main information
  *
@@ -7,7 +9,7 @@ package com.myself.sql.executor.app.model
  * @param formatOptions file format related information
  * @param path          file path
  */
-sealed class DataInfo(format: String, formatOptions: Option[Map[String, String]], path: String)
+sealed class DataInfo(format: String, formatOptions: Option[Map[String, String]])
 
 /**
  * Spark JSON-schema with compression type information
@@ -15,7 +17,7 @@ sealed class DataInfo(format: String, formatOptions: Option[Map[String, String]]
  * @param text            Spark JSON-schema
  * @param compressionType text compression type of 'none', 'lz4'
  */
-final case class DatasetSchemaJson(text: String, compressionType: Option[String] = Some("none"))
+final case class DatasetSchemaJson(text: String, compressionType: Option[String] = None)
 
 /**
  * Input data set information
@@ -29,11 +31,11 @@ final case class DatasetSchemaJson(text: String, compressionType: Option[String]
  */
 final case class InputDataInfo(format: String,
                                formatOptions: Option[Map[String, String]],
-                               path: String,
+                               path: Option[String] = None,
                                dataAlias: String,
-                               dataSetSchemaJson: Option[DatasetSchemaJson],
-                               dataSetSchemaPath: Option[String])
-  extends DataInfo(format, formatOptions, path)
+                               dataSetSchemaJson: Option[DatasetSchemaJson] = None,
+                               dataSetSchemaPath: Option[String] = None)
+  extends DataInfo(format, formatOptions)
 
 /**
  * Output data set information
@@ -46,8 +48,8 @@ final case class InputDataInfo(format: String,
 final case class OutputDataInfo(format: String,
                                 formatOptions: Option[Map[String, String]],
                                 path: String,
-                                saveMode: Option[String] = None)
-  extends DataInfo(format, formatOptions, path)
+                                saveMode: Option[SaveMode] = None)
+  extends DataInfo(format, formatOptions)
 
 /**
  * Spark JSON-schema with compression type information
@@ -55,7 +57,7 @@ final case class OutputDataInfo(format: String,
  * @param text            SQL
  * @param compressionType text compression type of 'none', 'lz4'
  */
-final case class SQL(text: String, compressionType: Option[String] = Some("none"))
+final case class SQL(text: String, compressionType: Option[String] = None)
 
 /**
  * Job processing information
@@ -67,8 +69,8 @@ final case class SQL(text: String, compressionType: Option[String] = Some("none"
  * @param configuration   process configuration
  * @param jobName         descriptive job name
  */
-final case class JobDefinition(inputsDataInfo: List[InputDataInfo],
-                               outputDataInfo: OutputDataInfo,
+final case class JobDefinition(inputsDataInfo: Option[List[InputDataInfo]] = None,
+                               outputDataInfo: Option[OutputDataInfo] = None,
                                sql: SQL,
                                sparkConfMap: Option[Map[String, String]],
                                configuration: Option[Map[String, Any]],
@@ -77,8 +79,8 @@ final case class JobDefinition(inputsDataInfo: List[InputDataInfo],
 /**
  * JobDefinition wrapper with compression type information
  *
- * @param jobDefinition   Job processing information
- * @param compressionType text compression of 'none', 'lz4'
+ * @param jobDefinitionStr  textual JobDefinition
+ * @param compressionType   text compression of 'none', 'lz4'
  */
-final case class JobRequest(jobDefinition: String,
-                            compressionType: Option[String] = Some("none"))
+final case class JobRequest(jobDefinitionStr: String,
+                            compressionType: Option[String] = None)

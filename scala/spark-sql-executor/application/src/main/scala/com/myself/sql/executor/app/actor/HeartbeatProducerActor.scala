@@ -41,7 +41,7 @@ class HeartbeatProducerActor(context: ActorContext[HeartbeatProducerActor.Comman
 
   import HeartbeatProducerActor._
 
-  val address = s"${config.getString("sql-executor.host")}:${config.getInt("sql-executor.port")}"
+  val address = s"${config.getString("host")}:${config.getInt("port")}"
 
   implicit val system: ActorSystem[_] = context.system
   implicit val ex: ExecutionContextExecutor = system.executionContext

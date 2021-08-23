@@ -36,11 +36,12 @@ object DataWriter {
     } else None
   }
 
-  def applyWriterSaveMode(dataFrameWriter: DataFrameWriter[Row], mode: Option[SaveMode]): DataFrameWriter[Row] ={
+  def applyWriterSaveMode(dataFrameWriter: DataFrameWriter[Row], mode: Option[SaveMode] = None): DataFrameWriter[Row] = {
 
     mode match {
       case Some(definedMode) => dataFrameWriter.mode(definedMode)
-      case None => dataFrameWriter.mode(SaveMode.Overwrite)
+      // default is SaveMode.ErrorIfExists
+      case None => dataFrameWriter
     }
   }
 
@@ -52,14 +53,12 @@ object DataWriter {
     val dataFrameWriterWithOptions = applyOptions(dataFrameWriter, outputDataInfo.formatOptions)
 
     // apply writer.mode
-    val saveMode = getSaveMode(outputDataInfo.saveMode)
-    val dataFrameWriterWithSaveMode = applyWriterSaveMode(dataFrameWriterWithOptions, saveMode)
+    val dataFrameWriterWithSaveMode = applyWriterSaveMode(dataFrameWriterWithOptions, outputDataInfo.saveMode)
 
     // save result DataFrame
-    val outputPath = outputDataInfo.path
-    dataFrameWriterWithSaveMode.save(outputPath)
+    dataFrameWriterWithSaveMode.save(outputDataInfo.path)
 
-    outputPath
+    outputDataInfo.path
   }
 
 }

@@ -44,8 +44,7 @@ class SparkSessionWrapper(sparkConf: SparkConf) {
 
   private val sparkSession: SparkSession = SparkSession
     .builder()
-//    .config(sparkConf)
-    .master("local[2]")
+    .config(sparkConf)
     .getOrCreate()
 
   def getInstance: SparkSession = sparkSession

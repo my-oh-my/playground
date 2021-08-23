@@ -28,14 +28,18 @@ object SchemaConverter {
         convertFromJson(
           Utilities.decompress(
             schemaJson.get.text,
-            schemaJson.get.compressionType.get
+            schemaJson.get.compressionType
           )
         )
       )
     }
     else if (schemaPath.isDefined) {
 
-      val schemaFromFile = Utilities.readFromFile(schemaPath.get).mkString("\n")
+      val (resource, iterator) = Utilities.readFromFile(schemaPath.get)
+      val schemaFromFile = iterator.mkString("\n")
+
+      // explicitly close resource
+      resource.close()
 
       Some(convertFromJson(schemaFromFile))
     } else None

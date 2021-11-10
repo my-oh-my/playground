@@ -1,9 +1,8 @@
 package com.myself.sql.executor.app.actor
 
 import java.util.concurrent.TimeUnit
-
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
-import akka.actor.typed.{Behavior, PostStop}
+import akka.actor.typed.{ActorSystem, Behavior, PostStop}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import com.myself.sql.executor.app.service.api.RestEndPoints
@@ -12,7 +11,7 @@ import com.myself.sql.executor.app.service.messaging.kafka.producer.HeartbeatSer
 import com.myself.sql.executor.app.service.spark.SparkSessionWrapper
 import com.typesafe.config.Config
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.{Failure, Success}
 
@@ -28,8 +27,8 @@ object ServerActor {
   def apply(config: Config): Behavior[Command] = {
     Behaviors.setup { context =>
 
-      implicit val system = context.system
-      implicit val ex = system.executionContext
+      implicit val system: ActorSystem[_] = context.system
+      implicit val ex: ExecutionContextExecutor = system.executionContext
 
       val routes = RestEndPoints.bindRoutes(config)
 

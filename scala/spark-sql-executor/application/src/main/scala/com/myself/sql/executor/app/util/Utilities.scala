@@ -18,7 +18,7 @@ object Utilities {
     val parsedConfig = arguments.getConfig.replace(separator, "\n")
     properties.load(new ByteArrayInputStream(parsedConfig.getBytes()))
 
-    val config =  ConfigFactory.parseProperties(properties).resolve()
+    val config = ConfigFactory.parseProperties(properties).resolve()
 
     // resolve application.conf properties
     ConfigFactory.parseResources("application.conf").withFallback(config).resolve()

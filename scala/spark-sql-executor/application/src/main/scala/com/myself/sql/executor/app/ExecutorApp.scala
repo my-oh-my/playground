@@ -30,7 +30,11 @@ object ExecutorApp {
   def processInputData(inputDataInfo: InputDataInfo)(implicit sparkSession: SparkSession): String = {
 
     // get Spark schema
-    val schema: Option[StructType] = SchemaConverter.convertSchema(inputDataInfo.dataSetSchemaJson, inputDataInfo.dataSetSchemaPath)
+    val schema: Option[StructType] =
+      SchemaConverter.convertSchema(
+        inputDataInfo.dataSetSchemaJson,
+        inputDataInfo.dataSetSchemaPath
+      )
 
     // input DataFrame
     val dataFrameReader = decideOnReader(

@@ -46,7 +46,6 @@ sealed abstract class DataReader(schema: Option[StructType] = None)
     val dataFrameReader = getDataFrameReader(format)
 
     // apply format options
-
     val dataFrameReaderWithOptions = applyFormatOptions(dataFrameReader, formatOptions)
 
     // apply schema

@@ -1,0 +1,19 @@
+# IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Maven
+log/
+logs/
+target/
+
+# Temporary
+.tmp/
+*.tmp
+
+# Logs
+*.log
+
+# Mac
+.DS_Store

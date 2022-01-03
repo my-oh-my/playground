@@ -1,33 +1,24 @@
 package com.myself.xml.reader.app.processing.spark.processing
 
+import com.myself.xml.reader.app.processing.spark.processing.matchresults.MatchResultsTransformations
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, explode, rank}
 import org.apache.spark.sql.types.IntegerType
 
-
-object PlayerTransformation {
-
-  import org.apache.log4j.{Level, Logger}
-  Logger.getLogger("org").setLevel(Level.OFF)
+object PlayerTransformation extends MatchResultsTransformations {
 
   val initialDataTransformation: DataFrame => DataFrame = inputDf => {
 
-    val initialSelectDf = inputDf.withColumn("players", explode(col("PlayerLineUp.MatchPlayer")))
-    val explodedStatDf = initialSelectDf
+    SelectPlayers(inputDf)
       .select(col("players"))
       .withColumn("player_id", col("players._PlayerRef"))
       .withColumn("stats", explode(col("players.Stat")))
-      .drop(col("players"))
-
-    val beforeAggregationDf = explodedStatDf
       .select(
         col("player_id"),
         col("stats._Type").as("statisticsType"),
         col("stats._VALUE").cast(IntegerType).as("statisticsValue")
       )
-
-    beforeAggregationDf
   }
 
   val topNPlayersStatistics: (DataFrame, String, Integer) => DataFrame = (inputDf, statisticsType, limit) => {
@@ -41,7 +32,11 @@ object PlayerTransformation {
 
     filteredDf
       .withColumn("rank", rank().over(windowSpecification))
-      .select(col("rank"), col("player_id"), col("statisticsType"), col("statisticsValue"))
+      .select(
+        col("rank").as("POSITION_IN_RANKING"),
+        col("player_id").as("PLAYER_ID"),
+        col("statisticsValue").as("STATISTICS_VALUE")
+      )
   }
 
 }

@@ -3,7 +3,7 @@ package com.myself.xml.reader.app
 import com.myself.xml.reader.app.domain.Arguments
 import com.myself.xml.reader.app.processing.spark.SparkSessionWrapper
 import com.myself.xml.reader.app.processing.spark.input.XmlReader
-import com.myself.xml.reader.app.processing.spark.processing.PlayerTransformation
+import com.myself.xml.reader.app.processing.spark.processing.{PlayerTransformation, TeamTransformation}
 import org.apache.spark.sql.SparkSession
 
 object XmlProcessorApp {
@@ -22,13 +22,19 @@ object XmlProcessorApp {
     val xmlReaderFormatOptions = Map("rootTag" -> "MatchData", "rowTag" -> "TeamData")
     val inputDF = XmlReader(Some(xmlReaderFormatOptions)).readDataFrame(statisticsPath).cache()
 
-    // run statistics on Players
+    // 1. run statistics on Players
     val top5PlayersStatisticsDf = inputDF
       .transform(PlayerTransformation.initialDataTransformation)
       .transform(PlayerTransformation.topNPlayersStatistics(_, statisticsType, 5))
-
     // outputs table-like result to stdout
     top5PlayersStatisticsDf.show(false)
+
+    // 2. run statistics on Teams
+    val teamStatisticsDf = inputDF
+      .transform(TeamTransformation.initialDataTransformation)
+      .transform(TeamTransformation.statisticsByTeamAndSide(_, statisticsType))
+    // outputs table-like result to stdout
+    teamStatisticsDf.show(false)
   }
 
 }

@@ -20,14 +20,13 @@ class PlayerTransformationSuite extends AnyFunSuite {
 
     val expectedSchema = StructType(
       Seq(
-        StructField("rank", IntegerType),
-        StructField("player_id", StringType),
-        StructField("statisticsType", StringType),
-        StructField("statisticsValue", IntegerType)
+        StructField("POSITION_IN_RANKING", IntegerType),
+        StructField("PLAYER_ID", StringType),
+        StructField("STATISTICS_VALUE", IntegerType)
       )
     )
 
-    val expectedData = Seq(Row(1, "p01", statisticsTypeCondition, 100))
+    val expectedData = Seq(Row(1, "p01", 100))
     val expectedDf = sparkSession.createDataFrame(sparkSession.sparkContext.parallelize(expectedData), expectedSchema)
 
     val inputSchema = StructType(

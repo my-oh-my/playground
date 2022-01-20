@@ -1,0 +1,25 @@
+# IntelliJ
+.bsp/
+.idea/
+*.iml
+*.iws
+
+log/
+logs/
+target/
+project/target/
+
+
+# Temporary
+.tmp/
+*.tmp
+
+# Logs
+*.log
+
+# Mac
+.DS_Store
+
+# Default ignored files
+/shelf/
+/.idea/workspace.xml

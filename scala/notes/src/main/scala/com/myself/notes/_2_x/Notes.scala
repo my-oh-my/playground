@@ -129,6 +129,8 @@ object TraitsVsAbstractNotes extends App {
   // we can mix-in many traits in contrast to abstract classes
   object WithMixedInTraits extends First with Second
 
+  // with AC we are able to introduce constructor parameters
+  //  with Traits only type parameters
   abstract class AbstractClass(val field: Int)
 
   val fromAbstractClass = new AbstractClass(1) {
@@ -137,6 +139,8 @@ object TraitsVsAbstractNotes extends App {
   }
   fromAbstractClass
 
+  // Traits would express the need to introduce some BEHAVIOUR - Walking
+  // Abstract classes would express the need to introduce some THING - Human
 }
 
 // Self-types are a way to declare that a trait must be mixed into another trait,
@@ -188,8 +192,25 @@ object ReferentialTransparency extends App {
 }
 
 // null, Nil, Null, None, Nothing Unit
-object NNotes extends App {
+object ClassHierarchyAndNNotes extends App {
 
+  // scala.Any - supertype of all types (top type)
+  //  defines equals, hashCode and toString
+
+  // scala.AnyVal
+  //  value types
+
+  // Unit - ()
+  //  empty return type
+  //    Unit type in Scala has one singleton value that is () - Java void does not have any value
+  //      as all functions must return something - Unit is still an option
+
+  // scala.AnyRef (java.lang.Object) - non-value types
+  //  all user-defined types are subtypes of AnyRef
+
+  // Null (capital N)
+  //  subtype of all reference types, it has a single value -> null
+  //    interoperability with JVM
   // null
   //  null is the value of a reference that is not referring to any object,
   //    it can be used as a replacement for all reference types — that is, all types that extend scala.AnyRef
@@ -209,14 +230,10 @@ object NNotes extends App {
   // None
   //  subtype of Option
 
-  // Nothing
+  // Nothing (vs. to Any is called 'bottom' type)
   //  absolutely no value in Scala, does not have any methods or values - can be used as an return type only where function throws exception
   //    extends Any type
-  //      can be used instead of any Scala type for both reference types and value types
-  Unit
-  // Unit - ()
-  //  empty return type
-  //    Unit type in Scala has one singleton value that is () - Java void does not have any value
+  //      can be used instead of any Scala type for both reference types and value types/subtype of all types
 
 }
 
@@ -318,6 +335,7 @@ object BasicFunctionsNotes extends App {
     function(parameter)
   }
 
+  // Function1, Function2, ... - function types
   val function1_1: Function1[Double, Double] = parameter => parameter * parameter
   val function1_2: Double => Double = parameter => parameter * parameter
   val function1_3 = (parameter: Double) => parameter * parameter
@@ -351,14 +369,14 @@ object BasicFunctionsNotes extends App {
   // Function Types
   //  Function1[A, R]
 
-  // assign an object representing the function to a variable
+  // Function is an object which can be stored in a variable - But a method always belongs to a class which has a name !!!
   // Since everything is an object in Scala f can now be treated as a reference to Function1[Int,Int] object
   val function2 = (x: Int) => x + 1
   // For example, we can call toString method inherited from Any.
   // That would have been impossible for a pure function, because functions don't have methods:
   println(function2(1).toString)
 
-  // Every object can be treated as a function, provided it has the apply method.
+  // Every object can be treated as a function, provided it has ONLY the apply method.
 
   def adder: Function1[Int, Function1[Int, Int]] = new Function1[Int, Function1[Int, Int]] {
 
@@ -378,13 +396,14 @@ object BasicFunctionsNotes extends App {
 
   // anonymous function
   val fancyAdder: Int => Int => Int = (x: Int) => (y: Int) => x + y
+  val moreFancyAdder = (x: Int) => (y: Int) => x + y
 
   // curried function
   assert(adder(1)(1) == 2)
   assert(sameAdder(1)(1) == 2)
 
   // Int => Int => Int - function receives Int and return Int => Int
-  assert(fancyAdder(1)(1) == 2)
+  assert(moreFancyAdder(1)(1) == 2)
 
 }
 
@@ -393,22 +412,40 @@ object AnonymousFunctionsNotes extends App {
   // lambda functions
   // expression that uses an anonymous function instead of a variable or value
   val intAdd: (Int, Int) => Int = (x: Int, y: Int) => x + y
-  val sugarIntAdd: (Int, Int) => Int = _ + _
+
+  val anonymousFunction_1: (Int, Int) => Int = _ + _
+  val anonymousFunction_2 = (x: Int, y: Int) => x + y
+  val anonymousFunction_3 = (_: Int) + (_: Int)
 
   assert(intAdd(1, 2) == 3)
-  assert(sugarIntAdd(1, 2) == 3)
+
+  assert(anonymousFunction_1(1, 2) == 3)
+  assert(anonymousFunction_2(1, 2) == 3)
+  assert(anonymousFunction_3(1, 2) == 3)
+
+  def myFunction(fun:(String, String)=> String): String =
+    fun("A", "B")
+
+  val f1 = myFunction((str1: String, str2: String) => str1.concat(str2))
+  // anonymous
+  val f2 = myFunction(_.concat(_))
+
+  assert(f1 == "AB")
+  assert(f2 == "AB")
 
   // lambda with no parameters
   val simplyDo: () => Int = () => 1
   assert(simplyDo() == 1)
 
   // using curly braces with lambdas
-  val stringToInt = { (str: String) =>
+  val stringToInt = { str: String =>
 
     str.toInt
   }
 
   assert(stringToInt("1") == 1)
+
+
 }
 
 // A closure is a function, whose return value depends on the value of one or more variables declared outside this function
@@ -469,16 +506,18 @@ object PartiallyAppliedFunctions extends App {
 
   assert(standardSum(100) == 200)
 
-  // Partial function application
+  // Partially applied function application
   // Turning method to function values
   def sumMethod(x: Int)(y: Int): Int = x + y
 
-  val liftedByCompiler = sumMethod(1) _ // 'underscore' tells compiler to ETA-EXPANSION Int => Int
   sumMethod(1)(_)
+
+  val liftedByCompiler = sumMethod(1) _ // 'underscore' tells compiler to ETA-EXPANSION/lifting Int => Int
+  //  There is NO corresponding way to convert a function into a method !!!
 }
 
-// Converting a function with multiple arguments into a sequence of functions that take one argument
-// Each function returns another function that consumes the following argument
+// Converting a function with multiple arguments into a SEQUENCE of functions that take one argument
+//  Each function returns another function that consumes the following argument
 object CurriedFunctionsMethodsNotes extends App {
 
   val sum: (Int, Int) => Int = (x, y) => x + y
@@ -515,6 +554,7 @@ object HOFNotes extends App {
 
   val plusOne: Int => Int = (x: Int) => x + 1
 
+  // Take function f and apply the function n-times to x, f 3 x - f(f(f(x)))
   def nTimes(f: Int => Int, n: Int, x: Int): Int = {
     if (n <= 0) x
     else nTimes(f, n - 1, f(x))
@@ -525,8 +565,8 @@ object HOFNotes extends App {
     else (x: Int) => nTimesHOF(f, n - 1)(f(x))
   }
 
-  val appliedZeroTimes = nTimesHOF(plusOne, 0)
-  assert(appliedZeroTimes(2) == 2)
+  val appliedZeroTimes = nTimesHOF(plusOne, 1)
+  assert(appliedZeroTimes(0) == 0)
 
 }
 
@@ -576,6 +616,40 @@ object ForComprehensionNotes extends App {
   for {
     n <- numbers
   } println(n)
+
+}
+
+object ImplicitExtensionNotes extends App {
+
+  // A method can have contextual parameters, also called implicit parameters, or simply implicits.
+  // Scala will look for implicitly available values of matching types. If it can find appropriate values, it automatically passes (silently) them.
+  trait Comparator[A] {
+    def compare(x: A, y: A): Int
+  }
+
+  object Comparator {
+    implicit object IntComparator extends Comparator[Int] {
+      def compare(x: Int, y: Int): Int = Integer.compare(x, y)
+    }
+  }
+
+  // Contextual parameter
+  def max[A](x: A, y: A)(implicit comparator: Comparator[A]): A =
+    if (comparator.compare(x, y) >= 0) x
+    else y
+
+  assert(max(10, 6) == 10)
+
+  // implicit val
+
+  // implicit def
+
+  // implicit class
+  object Helpers {
+    implicit class StringOps(str: String) {
+      def letItAllLoud = s"{$str} !!!"
+    }
+  }
 
 }
 
@@ -662,11 +736,25 @@ object PatternMatchingNotes extends App {
 
 object CollectionsNotes extends App {
 
+  /*
+    Traversable <- Iterable <- Set/Seq/Map
+
+    maps: map, flatMap, collect
+    conversions: toArray, toList, toSeq
+    size info: isEmpty, size, nonEmpty
+    tests: exists, forall
+    folds: foldLeft, foldRight, reduceLeft, reduceRight - applying function to neighboring elements of a sequence yielding new result,
+      which is then compared to the next element in the sequence to yield a new result
+      foldLeft works like reduceLeft, but it lets to set a seed value to be used for the first element list.foldLeft(20)(_ + _)
+    retrieval = head, find, tail
+
+   */
+
   // https://docs.scala-lang.org/overviews/collections/performance-characteristics.html
   // sequence-like collections/sets/maps
 }
 
-// Problem with recursion is that deep recursion can blow up the stack if we are not careful - java.lang.StackOverflowError
+// Problem with recursion is that DEEP recursion can blow up the stack if we are not careful - java.lang.StackOverflowError
 object RecursionNotes extends App {
 
   def sum(num: Int): Int = {
@@ -679,7 +767,7 @@ object RecursionNotes extends App {
 
   assert(sum(3) == 6)
 
-  // A recursive function is said to be tail recursive if the recursive call is the last thing done by the function
+  // A recursive function is said to be tail recursive if the recursive call is the LAST thing done by the function
   // There is no need to keep record of the previous state.
 
   import scala.annotation.tailrec
